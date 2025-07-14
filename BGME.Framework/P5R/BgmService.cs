@@ -10,18 +10,9 @@ internal unsafe class BgmService : BaseBgm
     private delegate void PlayBgmFunction(int cueId);
     private readonly SHFunction<PlayBgmFunction> playBgm;
 
-    private readonly Timer holdupBgmBuffer = new(TimeSpan.FromMilliseconds(1000)) { AutoReset = false };
-    private bool holdupBgmQueued;
-
     public BgmService(MusicService music)
         : base(music)
     {
-        this.holdupBgmBuffer.Elapsed += (sender, args) =>
-        {
-            this.PlayBgm(341);
-            this.holdupBgmQueued = false;
-        };
-        
         playBgm = new(PlayBgm, "40 53 48 83 EC 30 89 CB");
     }
     
@@ -35,21 +26,7 @@ internal unsafe class BgmService : BaseBgm
             return;
         }
 
-        // Buffer playing hold up music so it doesn't
-        // interrupt battle BGM if quick AOA.
-        if (cueId == 341 && this.holdupBgmQueued == false)
-        {
-            this.holdupBgmBuffer.Start();
-            this.holdupBgmQueued = true;
-            return;
-        }
-        else
-        {
-            this.holdupBgmBuffer.Stop();
-            this.holdupBgmQueued = false;
-
-            Log.Debug($"Playing BGM ID: {currentBgmId}");
-            this.playBgm.OriginalFunction((int)currentBgmId);
-        }
+        Log.Debug($"Playing BGM ID: {currentBgmId}");
+        this.playBgm.OriginalFunction((int)currentBgmId);
     }
 }
