@@ -41,7 +41,7 @@ internal unsafe class BgmService : BaseBgm
     private void SetBGMSceneImpl(UProjectSoundManager* self, EBgmScene scene, EFadeType fade, byte bForceReplay)
     {
         Log.Debug($"{nameof(SetBGMScene)} || {scene} || {fade}");
-        _SetBGMScene!.OriginalFunction(self, scene, fade, bForceReplay);
+        _SetBGMScene!.Hook.OriginalFunction(self, scene, fade, bForceReplay);
 
         if (_useVolumeFix && fade != EFadeType.PlayAfterFadeout && fade != EFadeType.NoFade)
         {
@@ -55,7 +55,7 @@ internal unsafe class BgmService : BaseBgm
     {
         if (cue == null)
         {
-            _SetBGM!.OriginalFunction(self, scene, cue, fade, bForceReplay);
+            _SetBGM!.Hook.OriginalFunction(self, scene, cue, fade, bForceReplay);
             return;
         }
 
@@ -88,7 +88,7 @@ internal unsafe class BgmService : BaseBgm
             this.ClearCustomCue();
         }
 
-        _SetBGM!.OriginalFunction(self, scene, cue, fade, bForceReplay);
+        _SetBGM!.Hook.OriginalFunction(self, scene, cue, fade, bForceReplay);
         if (_useVolumeFix && fade != EFadeType.PlayAfterFadeout && fade != EFadeType.NoFade)
         {
             self->BGMRequest.FadeTime = 1.0f;
@@ -120,7 +120,7 @@ internal unsafe class BgmService : BaseBgm
             return _currentCustomCue;
         }
 
-        _currentCustomCue = _GetAtomCueById.OriginalFunction(cueSheet, cueId);
+        _currentCustomCue = _GetAtomCueById.Hook.OriginalFunction(cueSheet, cueId);
         _currCustomCueId = cueId;
         return _currentCustomCue;
     }
