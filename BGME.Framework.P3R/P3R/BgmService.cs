@@ -17,16 +17,46 @@ internal unsafe class BgmService : BaseBgm
 
     private readonly ICriAtomEx criAtomEx;
     private IHook<RequestSound>? requestSoundHook;
+    
+    private static string[] RequestSoundCandidates =
+    [
+        "48 89 5C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 4C 89 74 24 ?? 45 31 D2",
+        "48 89 5C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 4C 89 74 24 ?? 45 33 D2"
+    ];
+    private readonly object RequestSoundLock = new();
+    private int RequestSoundSignaturesScanned;
 
     public BgmService(ICriAtomEx criAtomEx, MusicService music)
         : base(music)
     {
         this.criAtomEx = criAtomEx;
-
-        ScanHooks.Add(
-            nameof(RequestSound),
-            "48 89 5C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 4C 89 74 24 ?? 45 31 D2",
-            (hooks, result) => this.requestSoundHook = hooks.CreateHook<RequestSound>(this.RequestSoundImpl, result).Activate());
+        
+        foreach (var (Index, Candidate) in RequestSoundCandidates.Select((x, i) => (i, x)))
+        {
+            Project.Scans.AddScanHook($"RequestSound[{Index}]", Candidate, (result, hooks) =>
+                {
+                    lock (RequestSoundLock)
+                    {
+                        RequestSoundSignaturesScanned++;
+                        this.requestSoundHook ??= hooks.CreateHook<RequestSound>(RequestSoundImpl, result).Activate();
+                    }
+                },
+                () =>
+                {
+                    lock (RequestSoundLock)
+                    {
+                        RequestSoundSignaturesScanned++;
+                        if (RequestSoundSignaturesScanned == RequestSoundCandidates.Length)
+                        {
+                            Log.Error($"Failed to find a pattern for RequestSound.");
+                        }
+                        else
+                        {
+                            Log.Debug($"No matching pattern for RequestSound[{Index}].");
+                        }
+                    }
+                });
+        }
     }
 
     protected override int VictoryBgmId { get; } = 60;

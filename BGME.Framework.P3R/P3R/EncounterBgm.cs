@@ -23,20 +23,20 @@ internal unsafe class EncounterBgm : BaseEncounterBgm
     public EncounterBgm(MusicService music)
         : base(music)
     {
-        ScanHooks.Add(
+        Project.Scans.AddScanHook(
             nameof(UBtlCoreComponent_RequestBGM),
             "48 89 5C 24 ?? 57 48 83 EC 20 0F B6 DA 48 8B F9 E8 ?? ?? ?? ?? 84 DB 74 ?? 83 FB 01",
-            (hooks, result) => this.requestBgmHook = hooks.CreateHook<UBtlCoreComponent_RequestBGM>(this.RequestBGM, result).Activate());
+            (result, hooks) => this.requestBgmHook = hooks.CreateHook<UBtlCoreComponent_RequestBGM>(this.RequestBGM, result).Activate());
 
-        ScanHooks.Add(
+        Project.Scans.AddScanHook(
             nameof(UBtlCoreComponent_FadeoutBGM),
             "40 53 48 83 EC 20 48 8B D9 8B CA E8 ?? ?? ?? ?? C7 83 ?? ?? ?? ?? 00 00 00 00",
-            (hooks, result) => this.fadeoutBgmHook = hooks.CreateHook<UBtlCoreComponent_FadeoutBGM>(this.FadeoutBGM, result).Activate());
+            (result, hooks) => this.fadeoutBgmHook = hooks.CreateHook<UBtlCoreComponent_FadeoutBGM>(this.FadeoutBGM, result).Activate());
 
-        ScanHooks.Add(
+        Project.Scans.AddScanHook(
             nameof(USoundApp_PlayBattleBGM),
             "89 4C 24 ?? 48 83 EC 38 8B 4C 24 ?? E8 ?? ?? ?? ?? 89 44 24",
-            (hooks, result) => this.playBattleBgm = hooks.CreateWrapper<USoundApp_PlayBattleBGM>(result, out _));
+            (result, hooks) => this.playBattleBgm = hooks.CreateWrapper<USoundApp_PlayBattleBGM>(result, out _));
     }
 
     private EncounterMusicP3R? currentEncounter;

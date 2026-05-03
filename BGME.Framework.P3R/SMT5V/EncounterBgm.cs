@@ -34,7 +34,7 @@ internal unsafe class EncounterBgm : BaseEncounterBgm
         }
 
         Log.Debug($"{nameof(SetNextStepImpl)} || Step: {step}");
-        _SetNextStepHook!.OriginalFunction(self, step);
+        _SetNextStepHook!.Hook.OriginalFunction(self, step);
     }
 
     private static EncounterContext GetEncounterContext(E_BTL_SYMBOL_ENCOUNT symbol)
